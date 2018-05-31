@@ -174,7 +174,7 @@
 
     <scm>
         <connection>scm:git:https://github.com/rakam-io/rql.git</connection>
-        <developerConnection>scm:git:git@github.com:buremba/rakam-io/rql.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:rakam-io/rql.git</developerConnection>
         <url>https://github.com/rakam-io/rql</url>
         <tag>HEAD</tag>
     </scm>
