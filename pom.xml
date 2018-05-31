@@ -7,7 +7,7 @@
     <artifactId>rql</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Rql</name>
+    <name>rql</name>
     <inceptionYear>2018</inceptionYear>
 
     <licenses>
