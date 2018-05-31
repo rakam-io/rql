@@ -25,25 +25,28 @@ class Rql private constructor(source: String, private val settings: Settings) {
          */
         @JvmStatic
         @Throws(RqlException::class)
-        public fun parse(source: String, settings: Settings): Rql {
+        fun parse(source: String, settings: Settings): Rql {
             return Rql(source, settings)
         }
+
         /**
          * Parse the template string into a parse tree.
          * @param source The template string.
          */
         @JvmStatic
         @Throws(RqlException::class)
-        public fun parse(source: String): Rql {
+        fun parse(source: String): Rql {
             return Rql(source, Settings())
         }
     }
+
     private val root = compile(source)
     private val renderer = Renderer(root)
     /**
      * The types of the variables
      */
     val variables = infer(root)
+
     /**
      * Compiles the template string into a parse tree.
      */
@@ -54,27 +57,29 @@ class Rql private constructor(source: String, private val settings: Settings) {
         lexer.addErrorListener(ErrorListener())
         var tokens = CommonTokenStream(lexer)
         var parser = RqlParser(tokens)
-				parser.removeErrorListeners()
+        parser.removeErrorListeners()
         parser.addErrorListener(ErrorListener())
         return Tree(parser).generate()
     }
+
     private fun infer(root: Node): Variables {
         var declarations = TypeInference(root).run()
         for ((identifier, types) in declarations) {
             if (types.size > 1) {
-                if(settings.checkType) {
+                if (settings.checkType) {
                     throw ConflictingTypes(identifier, types)
                 }
             }
         }
         return declarations
     }
+
     /**
      * Renderer the template string.
      * @param definitions The definitions of the variables used in the template string.
      */
     @Throws(RqlException::class)
-    fun render(definitions: Map<String, Anything> = mapOf<String, Anything>()): String {
+    fun render(definitions: Map<String, Anything> = mapOf()): String {
         return renderer.run(settings, definitions)
     }
 
