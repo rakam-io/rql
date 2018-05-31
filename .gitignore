@@ -3,6 +3,7 @@
 
 target/
 build/
+staging/
 
 .classpath
 .project
@@ -10,3 +11,4 @@ build/
 bin/
 
 *.tokens
+

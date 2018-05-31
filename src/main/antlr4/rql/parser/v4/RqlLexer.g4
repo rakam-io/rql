@@ -1,67 +1,154 @@
 lexer grammar RqlLexer;
 
 @lexer::members {
-  private boolean stripSpacesAroundTags = false;
-  private boolean stripSingleLine = false;
+	private boolean stripNewlines = false;
 
-  public RqlLexer(CharStream charStream, boolean stripSpacesAroundTags) {
-    this(charStream, stripSpacesAroundTags, false);
-  }
+	public RqlLexer(CharStream charStream, boolean stripNewlines) {
+		this(charStream);
+		this.stripNewlines = stripNewlines;
+	}
 
-  public RqlLexer(CharStream charStream, boolean stripSpacesAroundTags, boolean stripSingleLine) {
-      this(charStream);
-      this.stripSpacesAroundTags = stripSpacesAroundTags;
-      this.stripSingleLine = stripSingleLine;
-    }
 }
 
-OutStart
- : ( {stripSpacesAroundTags && stripSingleLine}? SpaceOrTab* '{'
-   | {stripSpacesAroundTags && !stripSingleLine}? WhitespaceChar* '{'
-   | WhitespaceChar* '{-'
-   | '{'
-   ) -> pushMode(IN_TAG)
- ;
+tokens { ESCAPE_SEQUENCE, LITERAL, START_CODE}
 
-Other
- : .
- ;
+fragment
+Digit
+: [0-9]
+;
 
-fragment WhitespaceChar : [ \t\r\n];
-fragment SStr           : '\'' ~'\''* '\'';
-fragment DStr           : '"' ~'"'* '"';
-fragment SpaceOrTab     : [ \t];
-fragment LineBreak      : '\r'? '\n' | '\r';
-fragment Digit          : [0-9];
-fragment Letter         : [a-zA-Z];
+fragment
+Number
+: (Digit)+
+;
 
-mode IN_TAG;
+fragment
+Letter 
+: [a-zA-Z]
+;
 
-  OutStart2 : '{' -> pushMode(IN_TAG);
-
-  DotDot    : '..';
-  Dot       : '.';
-  OPar      : '(';
-  CPar      : ')';
-  OBr       : '[';
-  CBr       : ']';
-
-  OutEnd
-   : ( {stripSpacesAroundTags && stripSingleLine}? '}' SpaceOrTab* LineBreak?
-     | {stripSpacesAroundTags && !stripSingleLine}? '}' WhitespaceChar*
-     | '-}' WhitespaceChar*
-     | '}'
-     ) -> popMode
-   ;
-
-  Pipe      : '|';
-  Str : SStr | DStr;
-
-  WS : WhitespaceChar+ -> channel(HIDDEN);
-
-  Id : ( Letter | '_' ) (Letter | '_' | '-' | Digit)*;
+fragment
+Whitespace
+: [ \t]
+;
 
 
-mode IN_RAW;
+fragment
+Newline
+: [\r\n]
+;
 
-  OtherRaw : . ;
+fragment 
+Identifier
+: ( Letter | '_' ) ( Letter | '_' | Digit | '-' )*
+;
+
+DEFAULT_STRIP_NEWLINES
+: { stripNewlines }? Newline+ -> skip
+;
+
+DEFAULT_ESCAPE_SEQUENCE
+:	( '\\\\' )* '\\' ( '{' | '[' ) -> type(ESCAPE_SEQUENCE)
+;
+
+START_CODE
+:	( '\\\\' )* '{' -> pushMode(CODE_MODE)
+;
+
+START_ELVIS_IF
+:	( '\\\\' )* '[' -> pushMode(ELVIS_IF_MODE)
+;
+
+DEFAULT_LITERAL
+: . -> type(LITERAL)
+;
+
+mode CODE_MODE;
+
+	CODE_STRIP_NEWLINES 
+	: { stripNewlines }? Newline+ -> skip
+	;
+
+	IDENTIFIER
+	: Identifier
+	;
+
+	DOT
+	: '.'
+	;
+
+	START_SUBSCRIPT
+	: '['
+	;
+
+	INDEX
+	: Number
+	;
+
+	END_SUBSCRIPT
+	: ']'
+	;
+
+	END_CODE
+	: '}' -> popMode
+	;
+
+	CODE_ILLEGAL
+	: . 
+	;
+
+mode ELVIS_IF_MODE;
+
+	ELVIS_IF_STRIP_NEWLINES
+	: { stripNewlines }? Newline+ -> skip
+	;
+
+	ELVIS_IF_ESCAPE_SEQUENCE
+	:	( '\\\\' )* '\\' ( ']' | '{') -> type(ESCAPE_SEQUENCE)
+	;
+
+	ELVIS_IF_START_CODE
+	:	(	'\\\\' )* '{' -> type(START_CODE), pushMode(CODE_MODE)
+	;
+
+	END_ELVIS_IF
+	:	( '\\\\' )* ']' -> popMode, pushMode(INTERMEDIATE_MODE)
+	;
+
+	ELVIS_IF_LITERAL
+	: . -> type(LITERAL)
+	;
+
+mode INTERMEDIATE_MODE;
+
+	START_ELVIS_ELSE
+	: '('  -> popMode, pushMode(ELVIS_ELSE_MODE)
+	;
+
+	ELVIS_ILLEGAL
+	: .  -> popMode
+	;
+
+mode ELVIS_ELSE_MODE;
+
+	ELVIS_ELSE_STRIP_NEWLINES
+	: { stripNewlines }? Newline+ -> skip
+	;
+
+	ELVIS_ELSE_ESCAPE_SEQUENCE
+	:	( '\\\\' )* '\\' ( ')' | '{') -> type(ESCAPE_SEQUENCE)
+	;
+
+	ELVIS_ELSE_START_CODE
+	:	(	'\\\\' )* '{' -> type(START_CODE), pushMode(CODE_MODE)
+	;
+
+	END_ELVIS_ELSE
+	:	( '\\\\' )* ')' -> popMode
+	;
+
+	ELVIS_ELSE_LITERAL
+	: . -> type(LITERAL)
+	;
+
+

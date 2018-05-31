@@ -4,85 +4,107 @@ options {
   tokenVocab=RqlLexer;
 }
 
-parse
- : block EOF
- ;
+main
+	: ( ( 
+			startElvisIf elvis
+			| startElvisIf elvisIllegal
+			| startCode code
+			| escapeSequence
+			| text						
+			)*  EOF )
+		| startCode codeEof 
+		| startElvisIf elvisIfEof 
+		| startElvisIf elvisElseEof 
+	;
 
-block
- : atom*
- ;
 
-atom
- : output     #atom_output
- | other      #atom_others
- ;
+text
+	: ( LITERAL )+
+	;
 
-id
- : Id
+escapeSequence
+	: ESCAPE_SEQUENCE
+	;
 
- ;
+code
+	:	 ( legalCode | illegalCode) END_CODE
+	;
 
-id2
- : id
- | Empty
- | Nil
- | True
- | False
- ;
+legalCode
+	: expression
+	;
 
-expr
- : term                                          #expr_term
- ;
+illegalCode
+	: ( ~( END_CODE ) )*
+	;
+
+codeEof
+	: (  legalCode | illegalCode)  EOF
+	;
+
+expression
+	:	variable	
+	|	expression member
+	| expression subscript
+	;  
+
+variable
+	: IDENTIFIER
+	;
+
+subscript
+	:	START_SUBSCRIPT  ( index | expression ) END_SUBSCRIPT 
+	;
 
 index
- : Dot id2
- | OBr expr CBr
- ;
+	: INDEX
+	;
 
-term
- : DoubleNum      #term_DoubleNum
- | LongNum        #term_LongNum
- | Str            #term_Str
- | True           #term_True
- | False          #term_False
- | Nil            #term_Nil
- | lookup         #term_lookup
- | Empty          #term_Empty
- | OPar expr CPar #term_expr
- ;
+member
+	: DOT identifier
+	;
 
-lookup
- : id index* QMark?   #lookup_id_indexes
- | OBr Str CBr QMark? #lookup_Str
- | OBr Id CBr QMark?  #lookup_Id
- ;
+identifier
+	: IDENTIFIER
+	;
 
-output
- : outStart expr filter* OutEnd
- ;
+elvis
+	:	elvisIf START_ELVIS_ELSE elvisElse
+	;
 
-raw_body
- : OtherRaw*
- ;
+elvisIllegal
+	: elvisIf ELVIS_ILLEGAL
+	;
 
-filter
- : Pipe Id params?
- ;
+elvisIf
+	:	 (text | escapeSequence | ( startCode code ) )* endElvisIf
+	;
 
-params
- : Col param_expr ( Comma param_expr )*
- ;
+elvisIfEof
+	:	 (text | escapeSequence | ( startCode code ) )* EOF
+	;
 
-param_expr
- : id2 Col expr #param_expr_key_value
- | expr         #param_expr_expr
- ;
+elvisElse
+	:  (text | escapeSequence | ( startCode code) )* endElvisElse
+	;
 
-outStart
- : OutStart
- | OutStart2
- ;
+elvisElseEof
+	:  elvisIf START_ELVIS_ELSE elvisElse (text | escapeSequence | ( startCode code) )* EOF
+	;
 
-other
- : Other+
- ;
+startCode
+	: START_CODE
+	;
+
+startElvisIf
+	: START_ELVIS_IF
+	;
+
+endElvisIf
+	: END_ELVIS_IF
+	;
+
+endElvisElse
+	: END_ELVIS_ELSE
+	;
+
