@@ -105,6 +105,13 @@ public class RqlTest
 				"No '\\)' found starting from line (.+), index (.+)");
 	}
 	@Test
+	public void testNonStartingElseTag()
+		throws Exception
+	{
+		throwExceptionRegex("[]_", ImmutableMap.<String,Object>of(),
+				"No '\\(' found on line (.+), index (.+)");
+	}
+	@Test
 	public void testMissingStartingElseTag()
 		throws Exception
 	{
@@ -251,19 +258,7 @@ public class RqlTest
 	public void testSimpleOptionalEscape()
 		throws Exception
 	{
-		render("hi \\[{name}]()", of("name", "mobi"), "hi 'mobi'");
-	}
-	@Test
-	public void testSimpleOptionalEscapeAlt()
-		throws Exception
-	{
 		render("hi \\[{name}]()", of("name", "mobi"), "hi ['mobi']()");
-	}
-	@Test
-	public void testSimpleOptionalEscapeEscape()
-		throws Exception
-	{
-		render("hi \\[\\{name}]()", of("name", "mobi"), "hi {name}");
 	}
 	@Test
 	public void testSimpleOptionalEscapeEscapeAlt()

@@ -54,6 +54,8 @@ class Rql private constructor(source: String, private val settings: Settings) {
         lexer.addErrorListener(ErrorListener())
         var tokens = CommonTokenStream(lexer)
         var parser = RqlParser(tokens)
+				parser.removeErrorListeners()
+        parser.addErrorListener(ErrorListener())
         return Tree(parser).generate()
     }
     private fun infer(root: Node): Variables {

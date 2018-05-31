@@ -5,18 +5,79 @@ options {
 }
 
 main
-	: ( ( 
+	: (  
+			/*
+			 * '[]()' if-else statements
+			 */
 			startElvisIf elvis
-			| startElvisIf elvisIllegal
+			/*
+			 * '{}' Code tags
+			 */
 			| startCode code
+			/*
+			 * Escape sequences 
+			 * - Normal : '\{','\['
+			 * - If statement : '\{','\]'
+			 * - Else statement : '\{', '\)'
+			 */
 			| escapeSequence
+			/*
+			 * Plain text
+			 */
 			| text						
-			)*  EOF )
-		| startCode codeEof 
-		| startElvisIf elvisIfEof 
-		| startElvisIf elvisElseEof 
+			/*
+			 * After a starting if statement '()', no '[' is found.
+			 */
+			| startElvisIf elvisIllegal 
+		)* 
+		( EOF 
+			// Unexpected Eofs
+			/*
+			 * After a starting code tag '{', no closing '}' is found.
+			 */
+			| startCode codeEof 
+			/*
+			 * After a starting code tag in a if statement, '[{', no closing '}' is found. 
+			 */
+			| startElvisIf ( text | escapeSequence | ( startCode code ) )* startCode codeEof
+			/* 
+			 * After a starting code tag in a else statement '[]({', no closing '}' is found.
+			 */
+			| startElvisIf elvisIf START_ELVIS_ELSE (text | escapeSequence | ( startCode code) )*  startCode codeEof
+			/*
+			 * After a starting if statement '[', no closing ']' is found.
+			 */
+			| startElvisIf elvisIfEof  
+			/*
+			 * After a starting if statement '[]', EOF is encountered.
+			 */
+			| startElvisIf elvisIllegalEof
+			/*
+			 * After a starting else statement '[](', no closing ')' is found.
+			 */
+			| startElvisIf elvisElseEof 
+		)
 	;
 
+codeEof
+	: ( legalCode | illegalCode ) EOF
+	;
+
+elvisIfEof
+	:	( text | escapeSequence | ( startCode code ) )* EOF
+	;
+
+elvisElseEof
+	:  elvisIf START_ELVIS_ELSE (text | escapeSequence | ( startCode code) )* EOF
+	;
+
+elvisIllegalEof
+	: elvisIf EOF
+	;
+
+elvisIllegal
+	: elvisIf ELVIS_ILLEGAL
+	;
 
 text
 	: ( LITERAL )+
@@ -36,10 +97,6 @@ legalCode
 
 illegalCode
 	: ( ~( END_CODE ) )*
-	;
-
-codeEof
-	: (  legalCode | illegalCode)  EOF
 	;
 
 expression
@@ -72,24 +129,12 @@ elvis
 	:	elvisIf START_ELVIS_ELSE elvisElse
 	;
 
-elvisIllegal
-	: elvisIf ELVIS_ILLEGAL
-	;
-
 elvisIf
 	:	 (text | escapeSequence | ( startCode code ) )* endElvisIf
 	;
 
-elvisIfEof
-	:	 (text | escapeSequence | ( startCode code ) )* EOF
-	;
-
 elvisElse
 	:  (text | escapeSequence | ( startCode code) )* endElvisElse
-	;
-
-elvisElseEof
-	:  elvisIf START_ELVIS_ELSE elvisElse (text | escapeSequence | ( startCode code) )* EOF
 	;
 
 startCode

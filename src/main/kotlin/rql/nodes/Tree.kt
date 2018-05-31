@@ -44,6 +44,10 @@ class Tree(private val parser: RqlParser) : RqlParserBaseVisitor<Node>() {
         throw NoStartingElseTag(context.start.line, context.start.charPositionInLine)
     }
 
+    override fun visitElvisIllegalEof(context: RqlParser.ElvisIllegalEofContext): Node {
+        throw NoStartingElseTag(context.start.line, context.start.charPositionInLine)
+    }
+
     override fun visitText(context: RqlParser.TextContext): Node {
         return Literal<String>(context.text, context.text)
     }
@@ -75,7 +79,6 @@ class Tree(private val parser: RqlParser) : RqlParserBaseVisitor<Node>() {
     override fun visitElvisElse(context: RqlParser.ElvisElseContext): Node {
         return visitChildren(context, Interpolation(context.text, "(" + context.text))
     }
-
 
     override fun visitStartCode(context: RqlParser.StartCodeContext): Node {
         return Literal<String>(context.text, unescapeTag(context.text))
