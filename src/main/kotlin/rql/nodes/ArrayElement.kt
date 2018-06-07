@@ -19,6 +19,12 @@ class ArrayElement(source: String) : Node(source, source) {
     override fun eval(context: Context, vararg results: Result): Result {
         if (results.size == 2) {
             val (lhs, rhs) = results
+            if(lhs is Failure) {
+                return lhs
+            }
+            if(rhs is Failure) {
+                return rhs
+            }
             if (lhs is Success && rhs is Success) {
                 return when {
                     lhs.value !is List<*> -> Failure(text, NonArray(lhs.text))
