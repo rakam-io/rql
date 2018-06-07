@@ -1,6 +1,6 @@
 package rql;
 
-import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
 import rql.exceptions.ConflictingTypes
 import rql.exceptions.RqlException
@@ -51,7 +51,7 @@ class Rql private constructor(source: String, private val settings: Settings) {
      * Compiles the template string into a parse tree.
      */
     private fun compile(source: String): Node {
-        var cs = CharStreams.fromString(source)
+        var cs = ANTLRInputStream(source)
         var lexer = RqlLexer(cs, settings.stripNewlines)
         lexer.removeErrorListeners()
         lexer.addErrorListener(ErrorListener())
@@ -79,7 +79,7 @@ class Rql private constructor(source: String, private val settings: Settings) {
      * @param definitions The definitions of the variables used in the template string.
      */
     @Throws(RqlException::class)
-    fun render(definitions: Map<String, Anything> = mapOf()): String {
+    fun render(definitions: Map<String, Anything> = mapOf<String, Anything>()): String {
         return renderer.run(settings, definitions)
     }
 
