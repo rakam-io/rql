@@ -35,10 +35,9 @@ class Code(source: String, text: String) : Node(source, text) {
                         builder.append(result.value.toString())
 
                     } else if (result.value is LocalDate) {
-                        builder.append("date '${result.value.toString()}'")
-
+                        builder.append("CAST('${result.value.toString()}' AS DATE)")
                     } else {
-                        builder.append("'${result.value.toString()}'")
+                        builder.append("'${result.value}'")
                     }
                 }
             }
