@@ -315,7 +315,7 @@ public class RqlTest
             throws Exception
     {
         // render("hi {name}", of("name", LocalDate.parse("2018-1-1")), "hi date '2018-1-1'");
-        render("hi {name}", of("name", LocalDate.parse("2018-01-01")), "hi date '2018-01-01'");
+        render("hi {name}", of("name", LocalDate.parse("2018-01-01")), "hi  CAST('2018-01-01' AS DATE)");
     }
 
     @Test
@@ -344,7 +344,7 @@ public class RqlTest
             throws Exception
     {
         // render("hi {name.tobi}", of("name", of("tobi", LocalDate.parse("2018-1-1"))), "hi date '2018-1-1'");
-        render("hi {name.tobi}", of("name", of("tobi", LocalDate.parse("2018-01-01"))), "hi date '2018-01-01'");
+        render("hi {name.tobi}", of("name", of("tobi", LocalDate.parse("2018-01-01"))), "hi CAST('2018-01-01' AS DATE)");
     }
 
     @Test
