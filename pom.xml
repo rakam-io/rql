@@ -165,13 +165,6 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray-repo-maven</id>
-            <url>https://api.bintray.com/maven/buremba/maven/rql/;publish=1</url>
-        </repository>
-    </distributionManagement>
-
     <scm>
         <connection>scm:git:https://github.com/rakam-io/rql.git</connection>
         <developerConnection>scm:git:git@github.com:rakam-io/rql.git</developerConnection>
@@ -231,4 +224,15 @@
             </build>
         </profile>
     </profiles>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 </project>
