@@ -251,7 +251,7 @@ public class RqlTest
     public void testSimpleStringNotExist()
             throws Exception
     {
-        throwException("hi {name}", ImmutableMap.<String, Object>of(), "Variable 'name' doesn't exist");
+        throwException("hi {name}", ImmutableMap.<String, Object>of(), "Variable 'name' is not set");
     }
 
     @Test
