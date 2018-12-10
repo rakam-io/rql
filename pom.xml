@@ -5,7 +5,7 @@
 
     <groupId>io.rakam</groupId>
     <artifactId>rql</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>rql</name>
     <inceptionYear>2018</inceptionYear>

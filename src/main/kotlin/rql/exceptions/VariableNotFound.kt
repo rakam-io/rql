@@ -6,5 +6,5 @@ package rql.exceptions
  */
 class VariableNotFound(identifier: String)
     : RqlRunTimeException() {
-    override val message = "Variable '${identifier}' doesn't exist"
+    override val message = "Variable '$identifier' is not set"
 }
